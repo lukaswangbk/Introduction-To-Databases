@@ -4,6 +4,9 @@
       font-size: 15pt;
       font-family: arial;
     }
+    table, th, td {
+      border: 1px solid black;
+    }
   </style>
 
 <body>
@@ -31,6 +34,13 @@
       {% endfor %}
     </tbody>
   </table>
+
+  <h2>Update Account Information</h2>
+  <form method="POST" action="/updateaccountinfo">
+    <p>New Account Name: <input type="text" name="new_name"></p>
+    <p> <input type="submit" value="Update"> </p>
+    <p> <input type="hidden" name="acc" value={{acc}}> </p>
+  </form>
 
   <h1>Investment Product</h1>
   <table>

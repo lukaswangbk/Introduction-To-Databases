@@ -4,6 +4,9 @@
       font-size: 15pt;
       font-family: arial;
     }
+    table, th, td {
+      border: 1px solid black;
+    }
   </style>
 
 <body>
@@ -38,12 +41,24 @@
       {% endfor %}
     </tbody>
   </table>
-  
+
+  <h2>Update User Information</h2>
+  <form method="POST" action="/updateuserinfo">
+    <p>New Name: <input type="text" name="new_name"></p>
+    <p>New Mobile: <input type="text" name="new_mobile"></p>
+    <p>New Email: <input type="text" name="new_email"></p>
+    <p>New Address: <input type="text" name="new_address"></p>
+    <p>New Passport Number: <input type="text" name="new_passport_no"></p>
+    <p> <input type="submit" value="Update"> </p>
+    <p> <input type="hidden" name="user_id" value={{user_id}}> </p>
+  </form>
+
   <h1>Account Information</h1>
   <table>
     <thead>
       <tr>
         <th> Account ID </th>
+        <th> Account Name </th>
         <th> Since Date </th>
       </tr>
     </thead>
@@ -51,11 +66,21 @@
       {% for i in range(acc_id|length)%}
       <tr>
         <td> {{acc_id[i]}} </td>
+        <td> {{acc_name[i]}} </td>
         <td> {{since[i]}} </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+
+  <h2>Add New Account</h2>
+  <form method="POST" action="/addaccount">
+    <p>Account ID: <input type="text" name="acc_id"></p>
+    <p>Account Name: <input type="text" name="acc_name"></p>
+    <p>Date: <input type="text" name="since"></p>
+    <p> <input type="submit" value="Add"> </p>
+    <p> <input type="hidden" name="user_id" value={{user_id}}> </p>
+  </form>
 
 </body>
 

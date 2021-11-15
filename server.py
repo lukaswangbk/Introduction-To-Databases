@@ -117,18 +117,62 @@ def user(user):
   cursor.close()
 
   # get all accounts belong to the user
-  cursor = g.conn.execute("SELECT acc_id, since FROM Open WHERE user_id = %s", user)
+  cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user)
   acc_id = []
   since = []
+  acc_name=[]
 
   for result in cursor:
     acc_id.append(result['acc_id'])
+    acc_name.append(result['acc_name'])
     since.append(result['since'])
   cursor.close()
 
-  context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, since=since)
+  context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
   return render_template("user.html", **context)
 
+@app.route('/updateuserinfo', methods=['POST'])
+def updateuserinfo():
+  new_name = request.form['new_name']
+  new_mobile = request.form['new_mobile']
+  new_email = request.form['new_email']
+  new_address = request.form['new_address']
+  new_passport_no = request.form['new_passport_no']
+  user_id = request.form['user_id']
+  user = user_id
+  user_id = user_id[2:-2]
+  if new_name != '':
+    g.conn.execute('UPDATE Users SET User_name = %s WHERE user_id = %s', new_name, user_id)
+  if new_mobile != '':
+    # Check UNIQUE
+    cursor = g.conn.execute('SELECT * FROM Users WHERE Mobile = %s', new_mobile)
+    tmp_user_id = []
+    for result in cursor:
+      tmp_user_id.append(result['user_id'])
+    cursor.close()
+    if len(tmp_user_id) == 0:
+      g.conn.execute('UPDATE Users SET Mobile = %s WHERE user_id = %s', new_mobile, user_id)
+  if new_email != '':
+    # Check UNIQUE
+    cursor = g.conn.execute('SELECT * FROM Users WHERE Email = %s', new_email)
+    tmp_user_id = []
+    for result in cursor:
+      tmp_user_id.append(result['user_id'])
+    cursor.close()    
+    if len(tmp_user_id) == 0:
+      g.conn.execute('UPDATE Users SET Email = %s WHERE user_id = %s', new_email, user_id)
+  if new_address != '':
+    g.conn.execute('UPDATE Users SET Address = %s WHERE user_id = %s', new_address, user_id)
+  if new_passport_no != '':
+    # Check UNIQUE
+    cursor = g.conn.execute('SELECT * FROM Users WHERE Passport_no = %s', new_passport_no)
+    tmp_user_id = []
+    for result in cursor:
+      tmp_user_id.append(result['user_id'])
+    cursor.close()
+    if len(tmp_user_id) == 0:
+      g.conn.execute('UPDATE Users SET Passport_no = %s WHERE user_id = %s', new_passport_no, user_id)
+  return redirect(url_for('user', user = user))
 
 @app.route('/accountcheck', methods=['POST'])
 def accountcheck():
@@ -222,20 +266,119 @@ def accountcheck():
     cursor.close()
 
     # get all accounts belong to the user
-    cursor = g.conn.execute("SELECT acc_id, since FROM Open WHERE user_id = %s", user_id)
+    cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user)
     acc_id = []
     since = []
+    acc_name=[]
 
     for result in cursor:
       acc_id.append(result['acc_id'])
+      acc_name.append(result['acc_name'])
       since.append(result['since'])
     cursor.close()
 
-    context = dict(user_id=user_id_back, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, since=since)
+    context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
     return render_template("user.html", **context)
   else:
     context = dict(acc=acc, acc_name=acc_name, cash_balance=cash_balance, inv_balance=inv_balance, total_value=total_value, pay_id=pay_id, type=type, card_no=card_no, card_name=card_name, card_expire=card_expire, create_date=create_date, O_IP_id=O_IP_id, O_amount=O_amount, O_ip_name=O_ip_name, O_risk_type=O_risk_type, O_curr_yield=O_curr_yield, C_IP_id=C_IP_id, C_list_id=C_list_id, C_add_time=C_add_time, C_ip_name=C_ip_name, C_risk_type=C_risk_type, C_curr_yield=C_curr_yield)
     return render_template("account.html", **context)
+
+
+@app.route('/addaccount', methods=['POST'])
+def addaccount():
+  acc_id = request.form['acc_id']
+  since = request.form['since']
+  user_id = request.form['user_id']
+  user = user_id
+  user_id = user_id[2:-2]
+  acc_name = request.form['acc_name']
+  if acc_id != '' and since != '' and acc_name != '':
+    cursor = g.conn.execute('SELECT * FROM Account WHERE Acc_id = %s', acc_id)
+    tmp_acc_id = []
+    for result in cursor:
+      tmp_acc_id.append(result['acc_id'])
+    cursor.close()
+    if len(tmp_acc_id) == 0:
+      g.conn.execute('INSERT INTO Account VALUES (%s,%s,%s,%s,%s)', acc_id, acc_name, 0, 0, 0)
+      g.conn.execute('INSERT INTO Open VALUES (%s,%s,%s)', user_id, acc_id, since)
+  return redirect(url_for('user', user = user))
+
+@app.route('/updateaccountinfo', methods=['POST'])
+def updateaccountinfo():
+  new_name = request.form['new_name']
+  acc = request.form['acc']
+  acc_id = acc[2:-2]
+
+  if new_name != '':
+    g.conn.execute('UPDATE Account SET Acc_name = %s WHERE Acc_id = %s', new_name, acc_id)
+  # get information needed to redirect to account.html
+
+  # get all the account information
+  cursor = g.conn.execute('SELECT * FROM Account WHERE Acc_id = %s', acc_id)
+  acc = []
+  acc_name = []
+  cash_balance = []
+  inv_balance = []
+  total_value = []
+  for result in cursor:
+    acc.append(result['acc_id'])
+    acc_name.append(result['acc_name'])
+    cash_balance.append(result['cash_balance'])
+    inv_balance.append(result['inv_balance'])
+    total_value.append(result['total_value'])
+  cursor.close()
+
+  # get owning investment product information
+  cursor = g.conn.execute('SELECT * FROM Owns O, Investment_Product IP WHERE O.Acc_id = %s AND O.IP_id = IP.IP_id', acc_id)
+  O_IP_id = []
+  O_amount = []
+  O_ip_name = []
+  O_risk_type = []
+  O_curr_yield = []
+  for result in cursor:
+    O_IP_id.append(result['ip_id'])
+    O_amount.append(result['amount'])
+    O_ip_name.append(result['ip_name'])
+    O_risk_type.append(result['risk_type'])
+    O_curr_yield.append(result['curr_yield'])
+  cursor.close()
+
+  # get watching investment product information
+  cursor = g.conn.execute('SELECT * FROM Contains C, Investment_Product IP WHERE C.Acc_id = %s AND C.IP_id = IP.IP_id', acc_id)
+  C_IP_id = []
+  C_list_id = []
+  C_add_time = []
+  C_ip_name = []
+  C_risk_type = []
+  C_curr_yield = []
+  for result in cursor:
+    C_IP_id.append(result['ip_id'])
+    C_list_id.append(result['list_id'])
+    C_add_time.append(result['add_time'])
+    C_ip_name.append(result['ip_name'])
+    C_risk_type.append(result['risk_type'])
+    C_curr_yield.append(result['curr_yield'])
+  cursor.close()
+
+  # get payment method information
+  cursor = g.conn.execute('SELECT * FROM Has_Payment_method WHERE Acc_id = %s', acc_id)
+  pay_id = []
+  type = []
+  card_no = []
+  card_name = []
+  card_expire = []
+  create_date = []
+  for result in cursor:
+    pay_id.append(result['pay_id'])
+    type.append(result['type'])
+    card_no.append(result['card_no'])
+    card_name.append(result['card_name'])
+    card_expire.append(result['card_expire'])
+    create_date.append(result['create_date'])
+  cursor.close()
+
+  context = dict(acc=acc, acc_name=acc_name, cash_balance=cash_balance, inv_balance=inv_balance, total_value=total_value, pay_id=pay_id, type=type, card_no=card_no, card_name=card_name, card_expire=card_expire, create_date=create_date, O_IP_id=O_IP_id, O_amount=O_amount, O_ip_name=O_ip_name, O_risk_type=O_risk_type, O_curr_yield=O_curr_yield, C_IP_id=C_IP_id, C_list_id=C_list_id, C_add_time=C_add_time, C_ip_name=C_ip_name, C_risk_type=C_risk_type, C_curr_yield=C_curr_yield)
+  return render_template("account.html", **context)
 
 
 @app.route('/addpaymentmethod', methods=['POST'])
