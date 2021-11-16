@@ -21,7 +21,7 @@ Team: Jiaqing Chen (jc5657) & Lukas Wang (bw2712)
 Following requirements proposed on [websit](http://www.cs.columbia.edu/~gravano/cs4111/Proj1-3/) are satisfied. Detailed functionality is illustrated in the sections below:
 
 1. The PostgreSQL account where DB resides: jc5657
-2. URL of web application: [HERE](http://34.138.131.47:8111/)
+2. URL of web application: [http://34.138.131.47:8111/](http://34.138.131.47:8111/)
 3. Features Implemented:
     - User Login:
         - User can login through `\` (only user_id that in the database is acceptable, otherwise the page dumps red warning and ask for anther User ID input)
