@@ -304,6 +304,9 @@ def ip_action():
   if action == 'Buy':
     return redirect(url_for('buy', acc_id=acc_id, ip_id=ip_id))
 
+  elif action == 'Sell':
+    return redirect(url_for('sell', acc_id=acc_id, ip_id=ip_id))
+
   elif action == 'Follow':
     # add to watching list
     c1 = g.conn.execute("SELECT list_id FROM create_watchinglist WHERE acc_id=%s", acc_id)
@@ -623,6 +626,9 @@ def sell_check():
       if is_number(amount) == False:
         transaction = False
         info = "Please input a valid amount."
+      elif float(amount) <= 0:
+        transaction = False
+        info = "Please input a valid positive amount."
       elif float(amount) > float(amount_owned):
           transaction = False
           info = "Cannot sell more than you owned."
