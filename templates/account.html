@@ -54,6 +54,7 @@
         <th> Watching List ID </th>
         <th> Watching List Add Time </th>
         <th> Status </th>
+        <th> Action </th>
       </tr>
     </thead>
     <tbody>
@@ -67,6 +68,7 @@
         <td></td>
         <td> {{O_curr_yield[i]}} </td>
         <td> Owned </td>
+        <td> <input type="submit" name={{O_IP_id[i]}} value="Sell"> </td>
       </tr>
       {% endfor %}
       {% for i in range(C_IP_id|length)%}
@@ -79,6 +81,16 @@
         <td> {{C_list_id[i]}} </td>
         <td> {{C_add_time[i]}} </td>
         <td> Watching </td>
+        <td> 
+          <form method="POST" action="/ip_action">
+            <input type="hidden" name="acc" value={{acc}}>
+            <input type="submit" name={{C_IP_id[i]}} value="Buy"> 
+          </form>
+          <form method="POST" action="/removewatching">
+            <input type="hidden" name="acc" value={{acc}}>
+            <input type="submit" name={{C_IP_id[i]}} value="Remove">
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -122,7 +134,6 @@
     <p>Card Number: <input type="text" name="card_no"></p>
     <p>Card Name: <input type="text" name="card_name"></p>
     <p>Card Expire: <input type="text" name="card_expire"></p>
-    <p>Create Date: <input type="text" name="create_date"></p>
     <p> <input type="submit" value="Add"> </p>
     <p> <input type="hidden" name="acc_id" value={{acc}}> </p>
   </form>

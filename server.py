@@ -237,14 +237,12 @@ def accountcheck():
   card_no = []
   card_name = []
   card_expire = []
-  create_date = []
   for result in cursor:
     pay_id.append(result['pay_id'])
     type.append(result['type'])
     card_no.append(result['card_no'])
     card_name.append(result['card_name'])
     card_expire.append(result['card_expire'])
-    create_date.append(result['create_date'])
   cursor.close()
 
   if len(acc) == 0:
@@ -282,6 +280,7 @@ def accountcheck():
     context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
     return render_template("user.html", **context)
   else:
+    create_date = datetime.date.today()
     context = dict(acc=acc, acc_name=acc_name, cash_balance=cash_balance, inv_balance=inv_balance, total_value=total_value, pay_id=pay_id, type=type, card_no=card_no, card_name=card_name, card_expire=card_expire, create_date=create_date, O_IP_id=O_IP_id, O_amount=O_amount, O_ip_name=O_ip_name, O_risk_type=O_risk_type, O_curr_yield=O_curr_yield, C_IP_id=C_IP_id, C_list_id=C_list_id, C_add_time=C_add_time, C_ip_name=C_ip_name, C_risk_type=C_risk_type, C_curr_yield=C_curr_yield)
     return render_template("account.html", **context)
 
@@ -289,12 +288,12 @@ def accountcheck():
 @app.route('/addaccount', methods=['POST'])
 def addaccount():
   acc_id = request.form['acc_id']
-  since = request.form['since']
+  since = datetime.date.today()
   user_id = request.form['user_id']
   user = user_id
   user_id = user_id[2:-2]
   acc_name = request.form['acc_name']
-  if acc_id != '' and since != '' and acc_name != '':
+  if acc_id != '' and acc_name != '':
     cursor = g.conn.execute('SELECT * FROM Account WHERE Acc_id = %s', acc_id)
     tmp_acc_id = []
     for result in cursor:
@@ -369,16 +368,14 @@ def updateaccountinfo():
   card_no = []
   card_name = []
   card_expire = []
-  create_date = []
   for result in cursor:
     pay_id.append(result['pay_id'])
     type.append(result['type'])
     card_no.append(result['card_no'])
     card_name.append(result['card_name'])
     card_expire.append(result['card_expire'])
-    create_date.append(result['create_date'])
   cursor.close()
-
+  create_date = datetime.date.today()
   context = dict(acc=acc, acc_name=acc_name, cash_balance=cash_balance, inv_balance=inv_balance, total_value=total_value, pay_id=pay_id, type=type, card_no=card_no, card_name=card_name, card_expire=card_expire, create_date=create_date, O_IP_id=O_IP_id, O_amount=O_amount, O_ip_name=O_ip_name, O_risk_type=O_risk_type, O_curr_yield=O_curr_yield, C_IP_id=C_IP_id, C_list_id=C_list_id, C_add_time=C_add_time, C_ip_name=C_ip_name, C_risk_type=C_risk_type, C_curr_yield=C_curr_yield)
   return render_template("account.html", **context)
 
@@ -391,8 +388,8 @@ def addpaymentmethod():
   card_name = request.form['card_name']
   card_expire = request.form['card_expire']
   acc_id = request.form['acc_id']
-  create_date = request.form['create_date']
-  if type != '' and card_no != '' and card_name != '' and card_expire != '' and create_date != '':
+  create_date = datetime.date.today()
+  if type != '' and card_no != '' and card_name != '' and card_expire != '':
     g.conn.execute('INSERT INTO Has_Payment_method VALUES (%s,%s,%s,%s,%s,%s,%s)', pay_id, type, card_no, card_name, card_expire, acc_id, create_date)
   else:
     g.conn.execute('INSERT INTO Has_Payment_method(pay_id,acc_id) VALUES (%s,%s)', pay_id, acc_id)
@@ -412,10 +409,6 @@ def addpaymentmethod():
       g.conn.execute('UPDATE Has_Payment_method SET card_expire = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
     else: 
       g.conn.execute('UPDATE Has_Payment_method SET card_expire = %s WHERE (pay_id,acc_id) = (%s,%s)', card_expire, pay_id, acc_id)
-    if create_date == '':
-      g.conn.execute('UPDATE Has_Payment_method SET create_date = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
-    else: 
-      g.conn.execute('UPDATE Has_Payment_method SET create_date = %s WHERE (pay_id,acc_id) = (%s,%s)', create_date, pay_id, acc_id)
     
   # get information needed to redirect to account.html
 
@@ -473,16 +466,14 @@ def addpaymentmethod():
   card_no = []
   card_name = []
   card_expire = []
-  create_date = []
   for result in cursor:
     pay_id.append(result['pay_id'])
     type.append(result['type'])
     card_no.append(result['card_no'])
     card_name.append(result['card_name'])
     card_expire.append(result['card_expire'])
-    create_date.append(result['create_date'])
   cursor.close()
-
+  create_date = datetime.date.today()
   context = dict(acc=acc, acc_name=acc_name, cash_balance=cash_balance, inv_balance=inv_balance, total_value=total_value, pay_id=pay_id, type=type, card_no=card_no, card_name=card_name, card_expire=card_expire, create_date=create_date, O_IP_id=O_IP_id, O_amount=O_amount, O_ip_name=O_ip_name, O_risk_type=O_risk_type, O_curr_yield=O_curr_yield, C_IP_id=C_IP_id, C_list_id=C_list_id, C_add_time=C_add_time, C_ip_name=C_ip_name, C_risk_type=C_risk_type, C_curr_yield=C_curr_yield)
   return render_template("account.html", **context)
 
@@ -611,6 +602,7 @@ def ip_query():
 
 @app.route('/ip_action', methods=['POST', 'GET'])
 def ip_action():
+  print(request.form)
   ip_id = list(request.form)[1]
   acc = request.form['acc']
   acc_id = acc[2:-2]
@@ -740,6 +732,128 @@ def ip_action():
       return render_template("account.html", **context)
 
 
+@app.route('/removewatching', methods=['POST', 'GET'])
+def removewatching():
+  print(request.form)
+  ip_id = list(request.form)[1]
+  acc = request.form['acc']
+  acc_id = acc[2:-2]
+  #  remove from watching list
+  c1 = g.conn.execute("SELECT list_id FROM create_watchinglist WHERE acc_id=%s", acc_id)
+  list_id = c1.fetchone()[0]
+  c1.close()
+
+  c2_check = g.conn.execute("DELETE FROM contains WHERE list_id=%s and acc_id=%s and ip_id=%s", list_id, acc_id, ip_id)
+  c2_check.close()
+
+  c3 = g.conn.execute("SELECT user_id FROM Open WHERE acc_id=%s", acc_id)
+  user_id = c3.fetchone()[0]
+  c3.close()
+
+  # redirect to account.html
+  # get all the account information
+  cursor = g.conn.execute('SELECT * FROM Account WHERE Acc_id = %s AND Acc_id in (SELECT Acc_id FROM Open WHERE user_id = %s)', acc_id, user_id)
+  acc = []
+  acc_name = []
+  cash_balance = []
+  inv_balance = []
+  total_value = []
+  for result in cursor:
+    acc.append(result['acc_id'])
+    acc_name.append(result['acc_name'])
+    cash_balance.append(result['cash_balance'])
+    inv_balance.append(result['inv_balance'])
+    total_value.append(result['total_value'])
+  cursor.close()
+
+  # get owning investment product information
+  cursor = g.conn.execute('SELECT * FROM Owns O, Investment_Product IP WHERE O.Acc_id = %s AND O.IP_id = IP.IP_id', acc_id)
+  O_IP_id = []
+  O_amount = []
+  O_ip_name = []
+  O_risk_type = []
+  O_curr_yield = []
+  for result in cursor:
+    O_IP_id.append(result['ip_id'])
+    O_amount.append(result['amount'])
+    O_ip_name.append(result['ip_name'])
+    O_risk_type.append(result['risk_type'])
+    O_curr_yield.append(result['curr_yield'])
+  cursor.close()
+
+  # get watching investment product information
+  cursor = g.conn.execute('SELECT * FROM Contains C, Investment_Product IP WHERE C.Acc_id = %s AND C.IP_id = IP.IP_id', acc_id)
+  C_IP_id = []
+  C_list_id = []
+  C_add_time = []
+  C_ip_name = []
+  C_risk_type = []
+  C_curr_yield = []
+  for result in cursor:
+    C_IP_id.append(result['ip_id'])
+    C_list_id.append(result['list_id'])
+    C_add_time.append(result['add_time'])
+    C_ip_name.append(result['ip_name'])
+    C_risk_type.append(result['risk_type'])
+    C_curr_yield.append(result['curr_yield'])
+  cursor.close()
+
+  # get payment method information
+  cursor = g.conn.execute('SELECT * FROM Has_Payment_method WHERE Acc_id = %s', acc_id)
+  pay_id = []
+  type = []
+  card_no = []
+  card_name = []
+  card_expire = []
+  create_date = []
+  for result in cursor:
+    pay_id.append(result['pay_id'])
+    type.append(result['type'])
+    card_no.append(result['card_no'])
+    card_name.append(result['card_name'])
+    card_expire.append(result['card_expire'])
+    create_date.append(result['create_date'])
+  cursor.close()
+
+  if len(acc) == 0:
+    # get information needed to redirect to user.html
+    # get information in user
+    cursor = g.conn.execute("SELECT * FROM Users WHERE user_id = %s", user_id)
+    user_id_back = []
+    user_name = [] 
+    mobile = []
+    email = []
+    address = []
+    passport_no = []
+ 
+    for result in cursor:
+      user_id_back.append(result['user_id'])
+      user_name.append(result['user_name'])
+      mobile.append(result['mobile'])
+      email.append(result['email'])
+      address.append(result['address'])
+      passport_no.append(result['passport_no'])
+    cursor.close()
+
+    # get all accounts belong to the user
+    cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user)
+    acc_id = []
+    since = []
+    acc_name=[]
+
+    for result in cursor:
+      acc_id.append(result['acc_id'])
+      acc_name.append(result['acc_name'])
+      since.append(result['since'])
+    cursor.close()
+
+    context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
+    return render_template("user.html", **context)
+  else:
+    context = dict(acc=acc, acc_name=acc_name, cash_balance=cash_balance, inv_balance=inv_balance, total_value=total_value, pay_id=pay_id, type=type, card_no=card_no, card_name=card_name, card_expire=card_expire, create_date=create_date, O_IP_id=O_IP_id, O_amount=O_amount, O_ip_name=O_ip_name, O_risk_type=O_risk_type, O_curr_yield=O_curr_yield, C_IP_id=C_IP_id, C_list_id=C_list_id, C_add_time=C_add_time, C_ip_name=C_ip_name, C_risk_type=C_risk_type, C_curr_yield=C_curr_yield)
+    return render_template("account.html", **context)
+
+
 @app.route('/buy/<acc_id>/<ip_id>', methods=['POST', 'GET'])
 def buy(acc_id, ip_id):
 
@@ -782,7 +896,16 @@ def buy(acc_id, ip_id):
     c2.close()
   c1.close()
 
-  context = dict(info = info, type=type, data=data, title=title, acc_id=acc_id, ip_id = ip_id)
+  c4 = g.conn.execute('''
+      SELECT cash_balance, inv_balance, total_value
+      FROM account
+      WHERE acc_id = %s
+      ''', acc_id)
+  vals = list(c4)
+  val = [vals[0][0], vals[0][1], vals[0][2]]
+  c4.close()
+
+  context = dict(info = info, type=type, data=data, title=title, acc_id=acc_id, ip_id = ip_id, val=val)
   return render_template("buy.html", **context)
 
 def generate_id(n):
@@ -820,13 +943,17 @@ def buy_check():
           transaction = False
           info = "The invesment amount needs to be larger than minimum investment value."
       c1.close()
+
       # check payment method correct
-      c2 = g.conn.execute("SELECT pay_id FROM has_payment_method WHERE pay_id=%s and acc_id = %s", payment, acc_id)
-      data = list(c2)
-      if len(data) == 0:
-        transaction = False
-        info = "You don't have this payment method."
-      c2.close()
+      c_acc = g.conn.execute("SELECT cash_balance FROM account WHERE acc_id=%s", acc_id)
+      cash_bal = c_acc.fetchone()[0]
+      if float(cash_bal) < float(amount):
+        c2 = g.conn.execute("SELECT pay_id FROM has_payment_method WHERE pay_id=%s and acc_id = %s", payment, acc_id)
+        data = list(c2)
+        if len(data) == 0:
+          transaction = False
+          info = "You need to have a payment method to cover the amount but you enter an invalid one."
+        c2.close()
 
       if transaction == False:
         c1 = g.conn.execute('''
@@ -893,12 +1020,18 @@ def buy_check():
             c_own.close()
 
           # update account value
-          c_acc = g.conn.execute("SELECT inv_balance, total_value FROM account WHERE acc_id=%s", acc_id)
+          c_acc = g.conn.execute("SELECT cash_balance, inv_balance, total_value FROM account WHERE acc_id=%s", acc_id)
           data = list(c_acc)
-          inv_bal_ori, tot_bal_ori = data[0][0], data[0][1]
+          cash_bal_ori, inv_bal_ori, tot_bal_ori = data[0][0], data[0][1], data[0][2]
+
+          if float(cash_bal_ori) >= float(amount):
+              cash_bal_new = float(cash_bal_ori)-float(amount)
+          else:
+              cash_bal_new = 0
+
           inv_bal_new = float(inv_bal_ori)+float(amount)
-          tot_bal_new = float(tot_bal_ori)+float(amount)
-          c_acc_update = g.conn.execute("UPDATE account SET inv_balance=%s, total_value=%s WHERE acc_id=%s", inv_bal_new, tot_bal_new, acc_id)
+          tot_bal_new = cash_bal_new + inv_bal_new
+          c_acc_update = g.conn.execute("UPDATE account SET cash_balance=%s, inv_balance=%s, total_value=%s WHERE acc_id=%s", cash_bal_new, inv_bal_new, tot_bal_new, acc_id)
           c_acc_update.close()
           c_acc.close()
 

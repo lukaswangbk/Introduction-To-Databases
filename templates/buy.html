@@ -29,12 +29,26 @@
         {% endfor %}
     </table>
     </div>
+    <br/>
+    <div>
+      <p>Your current balance: </p>
+      <table>
+        <tr>
+            <th>Cash balance</th>
+            <th>Investment balance</th>
+            <th>Total value</th>
+        </tr>
+        <tr>
+            {% for n in val %}
+            <td>{{n}}</td>
+            {% endfor %}
+        </tr>
+      </table>
+      <p>Note: We will use your cash balance to cover your new investment first. If the cash balance is not enough to handle, you need to enter a payment method to put more money in your account and cover the remaining investment.</p>
+    </div>
 
-  <!-- <div>
-    {% for n in data %}
-    <div>{{n}}</div>
-    {% endfor %}
-  </div> -->
+
+    <br/>
 
 <form method="POST" action="/buy_check">
 <p>The amount you want to buy: </p>
@@ -46,7 +60,7 @@
     <input type="hidden" name="ip_id", value={{ip_id}}>
     <input type="hidden" name="acc_id", value={{acc_id}}>
 </p>
-<p>{{info}}</p>
+<p style="color:rgb(194, 40, 40);">{{info}}</p>
 <p><a href="../../ip/{{acc_id}}">Cancel, Go back to product page.</a></p>
 </form>
 
