@@ -79,11 +79,14 @@ def teardown_request(exception):
 
 @app.route('/')
 def login():
-  return render_template("login.html")
+  info = ""
+  context = dict(info=info)
+  return render_template("login.html", **context)
 
 
 @app.route('/logincheck', methods=['POST'])
 def logincheck():
+  info = ""
   user_id = request.form['user_id']
   cursor = g.conn.execute('SELECT user_id FROM Users WHERE user_id = %s', user_id)
   user_id = []
@@ -92,7 +95,9 @@ def logincheck():
   cursor.close()
 
   if len(user_id) == 0:
-    return redirect('/')
+    info = "Please input a valid User ID."
+    context = dict(info=info)
+    return render_template("login.html", **context)
   else:
     return redirect(url_for('user', user = user_id))
 
@@ -237,12 +242,14 @@ def accountcheck():
   card_no = []
   card_name = []
   card_expire = []
+  create_date = []
   for result in cursor:
     pay_id.append(result['pay_id'])
     type.append(result['type'])
     card_no.append(result['card_no'])
     card_name.append(result['card_name'])
     card_expire.append(result['card_expire'])
+    create_date.append(result['create_date'])
   cursor.close()
 
   if len(acc) == 0:
@@ -282,7 +289,6 @@ def accountcheck():
     context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
     return render_template("user.html", **context)
   else:
-    create_date = datetime.date.today()
     context = dict(acc=acc, acc_name=acc_name, cash_balance=cash_balance, inv_balance=inv_balance, total_value=total_value, pay_id=pay_id, type=type, card_no=card_no, card_name=card_name, card_expire=card_expire, create_date=create_date, O_IP_id=O_IP_id, O_amount=O_amount, O_ip_name=O_ip_name, O_risk_type=O_risk_type, O_curr_yield=O_curr_yield, C_IP_id=C_IP_id, C_list_id=C_list_id, C_add_time=C_add_time, C_ip_name=C_ip_name, C_risk_type=C_risk_type, C_curr_yield=C_curr_yield)
     return render_template("account.html", **context)
 
@@ -392,26 +398,34 @@ def addpaymentmethod():
   acc_id = request.form['acc_id']
   acc_id = acc_id.strip("'][")
   create_date = datetime.date.today()
-  if pay_id != '' and type != '' and card_no != '' and card_name != '' and card_expire != '':
-    g.conn.execute('INSERT INTO Has_Payment_method VALUES (%s,%s,%s,%s,%s,%s,%s)', pay_id, type, card_no, card_name, card_expire, acc_id, create_date)
-  elif pay_id != '':
-    g.conn.execute('INSERT INTO Has_Payment_method(pay_id,acc_id) VALUES (%s,%s)', pay_id, acc_id)
-    if type == '':
-      g.conn.execute('UPDATE Has_Payment_method SET type = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
-    else: 
-      g.conn.execute('UPDATE Has_Payment_method SET type = %s WHERE (pay_id,acc_id) = (%s,%s)', type, pay_id, acc_id)
-    if card_no == '':
-      g.conn.execute('UPDATE Has_Payment_method SET card_no = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
-    else: 
-      g.conn.execute('UPDATE Has_Payment_method SET card_no = %s WHERE (pay_id,acc_id) = (%s,%s)', card_no, pay_id, acc_id)
-    if card_name == '':
-      g.conn.execute('UPDATE Has_Payment_method SET card_name = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
-    else: 
-      g.conn.execute('UPDATE Has_Payment_method SET card_name = %s WHERE (pay_id,acc_id) = (%s,%s)', card_name, pay_id, acc_id)
-    if card_expire == '':
-      g.conn.execute('UPDATE Has_Payment_method SET card_expire = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
-    else: 
-      g.conn.execute('UPDATE Has_Payment_method SET card_expire = %s WHERE (pay_id,acc_id) = (%s,%s)', card_expire, pay_id, acc_id)
+
+  cursor = g.conn.execute('SELECT pay_id FROM Has_Payment_method WHERE acc_id = %s', acc_id)
+  all_pay_id = []
+  for result in cursor:
+    all_pay_id.append(result['pay_id'])
+  cursor.close()
+
+  if pay_id not in all_pay_id:
+    if pay_id != '' and type != '' and card_no != '' and card_name != '' and card_expire != '':
+      g.conn.execute('INSERT INTO Has_Payment_method VALUES (%s,%s,%s,%s,%s,%s,%s)', pay_id, type, card_no, card_name, card_expire, acc_id, create_date)
+    elif pay_id != '':
+      g.conn.execute('INSERT INTO Has_Payment_method(pay_id,acc_id) VALUES (%s,%s)', pay_id, acc_id)
+      if type == '':
+        g.conn.execute('UPDATE Has_Payment_method SET type = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
+      else: 
+        g.conn.execute('UPDATE Has_Payment_method SET type = %s WHERE (pay_id,acc_id) = (%s,%s)', type, pay_id, acc_id)
+      if card_no == '':
+        g.conn.execute('UPDATE Has_Payment_method SET card_no = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
+      else: 
+        g.conn.execute('UPDATE Has_Payment_method SET card_no = %s WHERE (pay_id,acc_id) = (%s,%s)', card_no, pay_id, acc_id)
+      if card_name == '':
+        g.conn.execute('UPDATE Has_Payment_method SET card_name = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
+      else: 
+        g.conn.execute('UPDATE Has_Payment_method SET card_name = %s WHERE (pay_id,acc_id) = (%s,%s)', card_name, pay_id, acc_id)
+      if card_expire == '':
+        g.conn.execute('UPDATE Has_Payment_method SET card_expire = NULL WHERE (pay_id,acc_id) = (%s,%s)', pay_id, acc_id)
+      else: 
+        g.conn.execute('UPDATE Has_Payment_method SET card_expire = %s WHERE (pay_id,acc_id) = (%s,%s)', card_expire, pay_id, acc_id)
     
   # get information needed to redirect to account.html
   # get all the account information
