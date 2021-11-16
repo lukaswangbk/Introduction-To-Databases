@@ -37,6 +37,27 @@ Following requirements proposed on [websit](http://www.cs.columbia.edu/~gravano/
           - For watching product, user could buy it or remove it from the watching list
         - User could check all avaiable investment product through `Check All Investment Product` button
         - This page shows all the payment information in this account and accepts adding new payment method (with red warning indicating acceptable input value)
+    - Investment Product
+        - This page shows all investment products that are available to be traded on the system
+        - User could add filters and query the product they are interested, they may
+            - search the `ID` or `Name` by keywords
+            - select a specific `Risk`, `Status`, `Category` group. Specially, different information will be shown under different `Category` group, ex. "stock capital price", "stock open price", "stock close price" will show for stock products but not bond nor gold. If user chooses to see all category, only the class name will be shown for each product.
+            - specify a listing order on `Current Yield`, `Minimum Investment value`, `Freezing Time`, `Create Date`, `Expire Date`
+            - see the query result through `Apply` button
+        - User chould buy the interested product through `Buy` button, or add it to their watching list through `Follow` button. 
+        - `Back` button redirects users to their account page.
+    - Buy & Sell
+        - After user click the `Buy` or `Sell` button for the product, they will be directed to the buy&sell page.
+        - This page shows the informations of selected product and user's account balance, and allows user to input the amount they want to buy or sell.
+            - To buy a product, the amount should not be lower than the product minimum investment value. If the user's cash balance cannot cover the amount, the payment method field is required, which should be the user's payment method id.
+            - To sell a product, the amount should not be greater than the user owned.
+            - If invalid input is received, the page will reload and show the corresponding illegal input.
+        - User can cancel the trading through `Cancel, go back to product page`.
+        - Buying a product will decrease the user's cash balance but increase the investment balance. If cash balance is not sufficient, user will use extra payment, which increases the total value of an account.
+        - Selling a product increases the cash balance and decrease the investment balance. Total value remains.
+    - Trading successful page
+        - After sell & buy completed, this page shows the successful information and the current account's information, investment product owned, and trading history.
+        - User can go back through `Go back to the product page`.
 
 
 4. Two web pages that require the most interesting database queries:
