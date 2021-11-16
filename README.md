@@ -1,4 +1,4 @@
-# GoodViews
+# WeTrade
 
 A investment database and trading platform.
 
@@ -16,30 +16,19 @@ Team: Jiaqing Chen (jc5657) & Lukas Wang (bw2712)
 
 **NOTE: Implementation in Python 3.5**
 
-**Proposal Description:** Goodviews is a platform for cinema/theater information and ticket reservation. While sites such as IMDB and RottenTomatoes exist to provide audiences with the latest film, TV and celebrity content and allow users to post reviews of media content, they lack a sense of social community. Furthermore, existing platforms often lack coherence due to the variety of media content. In Goodviews, we aim to marry the best aspects of Goodreads and IMDB and create a digital community of film fans. We offer a more ​streamlined ​database by focusing on movies rather than TV shows or other media. Users can curate ​collections ​of movies (such as "Movies I Want To Watch"), browse actors and post ​reviews ​of movies. They will be able to search a ​robust database ​ for films based on year/genre/rating, browse
-plot synopsis, and post reviews on movies or theaters.
+**Proposal Description:** Investment is a popular life style in the modern world. In this project, we plan to build an investment product trading system (WeTrade) that allows individuals to manage their money by investing well-built investment products. In our design, there are large amounts of investment product available for trading. Customers (Users) enter the virtual market, search for what they interest, and make a trade to invest their money. The interesting and also challenging part is that user’s account value will automatically change with the floating return rate of different products, user could also classify all investment product using multiple filter, and the system will capture every deal and promptly reflect them on market-side, bill-side and user-side.
 
-We satisfied the following 3 requirements. Functionality is detailed in the sections below:
-
-1. Your application must execute SQL query strings on your database on our class's PostgreSQL server. You cannot use an Object-Relational Mapper, or ORM. An important goal of this project is that you practice writing and debugging SQL queries as part of your application, so tools that attempt to make this "too easy" are not permitted.
-2. Your application must provide a way to view or interact with all the entities and relationships in your final E/R diagram.
-Your application's web interface does not need to be beautiful or sophisticated. Plain text pages are acceptable. You will not get additional credit for fancy interfaces, as this is not the focus of our course.
-3. In general, you can use any third-party libraries you want except for ORMs or other libraries that simplify database access, which are not allowed. If you are unsure if a library is permitted, ask your project mentor.
-
-**Front-End:** We use the Materialize framework (essentially a substitute for Boostrap) for the front-end. It only handles UI interactions and doesn't perform any data handling/processing. The only JavaScript we write is calls to UI component initializers (eg. that handle things like automatically hiding side navigation and opening on button click). See `static/js/main.js` file for more information.
+Following requirements proposed on [websit](http://www.cs.columbia.edu/~gravano/cs4111/Proj1-3/) are satisfied. Detailed functionality is illustrated in the sections below:
 
 1. The PostgreSQL account where DB resides: jc5657
-2. URL of web application: [http://34.74.246.148:8111](http://34.74.246.148:8111)
+2. URL of web application: [HERE](http://34.138.131.47:8111/)
 3. Features Implemented:
-    - User:
-        - User may login/register for an account
-        - Users REVIEW Reviewable (Movies, Theaters)
-    - Movies:
-        - Browse movie database on main page and easily view details on plot synopsis
-        - View Talent that STARS_IN Movies
-        - Movies ISA Reviewable, you can view reviews of movies
-        - Users can post/update REVIEW of Movies
-				- Users can search for Movies by name, year or genre
+    - User Login:
+        - User can login through `\` (only user_id that in the database is acceptable, otherwise the page dumps red warning and ask for anther User ID input)
+    - User Information and Login:
+        - After user login, the page shows user information and accepts update (with red warning indicating acceptable input value)
+        - The page shows all the account belongs to the user and accepts create new account (with red warning indicating acceptable input value)
+        - 
     - Talent:
         - View Talent that STARS_IN Movies
     - Theaters:
