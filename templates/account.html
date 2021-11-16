@@ -35,6 +35,12 @@
     </tbody>
   </table>
 
+  <h2>Back</h2>
+  <form method="POST" action="/backtoaccountlogin">
+    <p> <input type="submit" value="Back to Account Login"> </p>
+    <p> <input type="hidden" name="acc" value={{acc}}> </p>
+  </form>
+
   <h2>Update Account Information</h2>
   <form method="POST" action="/updateaccountinfo">
     <p>New Account Name: <input type="text" name="new_name"></p>

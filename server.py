@@ -129,7 +129,7 @@ def user(user):
     acc_name.append(result['acc_name'])
     since.append(result['since'])
   cursor.close()
-
+  user_id = user_id.split()
   context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
   return render_template("user.html", **context)
 
@@ -719,7 +719,7 @@ def ip_action():
       cursor.close()
 
       # get all accounts belong to the user
-      cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user)
+      cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user_id)
       acc_id = []
       since = []
       acc_name=[]
@@ -729,7 +729,7 @@ def ip_action():
         acc_name.append(result['acc_name'])
         since.append(result['since'])
       cursor.close()
-
+      user_id = user_id.split()
       context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
       return render_template("user.html", **context)
     else:
@@ -841,7 +841,7 @@ def removewatching():
     cursor.close()
 
     # get all accounts belong to the user
-    cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user)
+    cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user_id)
     acc_id = []
     since = []
     acc_name=[]
@@ -851,7 +851,7 @@ def removewatching():
       acc_name.append(result['acc_name'])
       since.append(result['since'])
     cursor.close()
-
+    user_id = user_id.split()
     context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
     return render_template("user.html", **context)
   else:
@@ -1405,7 +1405,7 @@ def back_action():
     cursor.close()
 
     # get all accounts belong to the user
-    cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user)
+    cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user_id)
     acc_id = []
     since = []
     acc_name=[]
@@ -1415,13 +1415,121 @@ def back_action():
       acc_name.append(result['acc_name'])
       since.append(result['since'])
     cursor.close()
-
+    user_id = user_id.split()
     context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
     return render_template("user.html", **context)
   else:
     context = dict(acc=acc, acc_name=acc_name, cash_balance=cash_balance, inv_balance=inv_balance, total_value=total_value, pay_id=pay_id, type=type, card_no=card_no, card_name=card_name, card_expire=card_expire, create_date=create_date, O_IP_id=O_IP_id, O_amount=O_amount, O_ip_name=O_ip_name, O_risk_type=O_risk_type, O_curr_yield=O_curr_yield, C_IP_id=C_IP_id, C_list_id=C_list_id, C_add_time=C_add_time, C_ip_name=C_ip_name, C_risk_type=C_risk_type, C_curr_yield=C_curr_yield)
     return render_template("account.html", **context)
 
+
+@app.route('/backtoaccountlogin', methods=['POST', 'GET'])
+def backtoaccountlogin():
+  acc = request.form['acc']
+  acc_id = acc.strip("'][")
+ 
+  c3 = g.conn.execute("SELECT user_id FROM Open WHERE acc_id=%s", acc_id)
+  user_id = c3.fetchone()[0]
+  c3.close()
+
+  # redirect to account.html
+  # get all the account information
+  cursor = g.conn.execute('SELECT * FROM Account WHERE Acc_id = %s AND Acc_id in (SELECT Acc_id FROM Open WHERE user_id = %s)', acc_id, user_id)
+  acc = []
+  acc_name = []
+  cash_balance = []
+  inv_balance = []
+  total_value = []
+  for result in cursor:
+    acc.append(result['acc_id'])
+    acc_name.append(result['acc_name'])
+    cash_balance.append(result['cash_balance'])
+    inv_balance.append(result['inv_balance'])
+    total_value.append(result['total_value'])
+  cursor.close()
+
+  # get owning investment product information
+  cursor = g.conn.execute('SELECT * FROM Owns O, Investment_Product IP WHERE O.Acc_id = %s AND O.IP_id = IP.IP_id', acc_id)
+  O_IP_id = []
+  O_amount = []
+  O_ip_name = []
+  O_risk_type = []
+  O_curr_yield = []
+  for result in cursor:
+    O_IP_id.append(result['ip_id'])
+    O_amount.append(result['amount'])
+    O_ip_name.append(result['ip_name'])
+    O_risk_type.append(result['risk_type'])
+    O_curr_yield.append(result['curr_yield'])
+  cursor.close()
+
+  # get watching investment product information
+  cursor = g.conn.execute('SELECT * FROM Contains C, Investment_Product IP WHERE C.Acc_id = %s AND C.IP_id = IP.IP_id', acc_id)
+  C_IP_id = []
+  C_list_id = []
+  C_add_time = []
+  C_ip_name = []
+  C_risk_type = []
+  C_curr_yield = []
+  for result in cursor:
+    C_IP_id.append(result['ip_id'])
+    C_list_id.append(result['list_id'])
+    C_add_time.append(result['add_time'])
+    C_ip_name.append(result['ip_name'])
+    C_risk_type.append(result['risk_type'])
+    C_curr_yield.append(result['curr_yield'])
+  cursor.close()
+
+  # get payment method information
+  cursor = g.conn.execute('SELECT * FROM Has_Payment_method WHERE Acc_id = %s', acc_id)
+  pay_id = []
+  type = []
+  card_no = []
+  card_name = []
+  card_expire = []
+  create_date = []
+  for result in cursor:
+    pay_id.append(result['pay_id'])
+    type.append(result['type'])
+    card_no.append(result['card_no'])
+    card_name.append(result['card_name'])
+    card_expire.append(result['card_expire'])
+    create_date.append(result['create_date'])
+  cursor.close()
+
+  # get information needed to redirect to user.html
+  # get information in user
+  cursor = g.conn.execute("SELECT * FROM Users WHERE user_id = %s", user_id)
+  user_id_back = []
+  user_name = [] 
+  mobile = []
+  email = []
+  address = []
+  passport_no = []
+
+  for result in cursor:
+    user_id_back.append(result['user_id'])
+    user_name.append(result['user_name'])
+    mobile.append(result['mobile'])
+    email.append(result['email'])
+    address.append(result['address'])
+    passport_no.append(result['passport_no'])
+  cursor.close()
+
+  # get all accounts belong to the user
+  cursor = g.conn.execute("SELECT O.acc_id, A.acc_name, O.since FROM Open O, Account A WHERE user_id = %s AND A.acc_id = O.acc_id", user_id)
+  acc_id = []
+  since = []
+  acc_name=[]
+
+  for result in cursor:
+    acc_id.append(result['acc_id'])
+    acc_name.append(result['acc_name'])
+    since.append(result['since'])
+  cursor.close()
+  user_id = user_id.split()
+  context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
+  return render_template("user.html", **context)
 
 if __name__ == "__main__":
   import click
