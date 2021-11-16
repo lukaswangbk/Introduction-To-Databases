@@ -1,0 +1,58 @@
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <div>{{data}}</div>
+
+<div>
+    <p>Account</p>
+    <table>
+        {% for row in acc %}
+        <tr>
+            {% for n in row %}
+            <td>{{n}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div>
+    <p>Owns</p>
+    <table>
+        {% for row in own %}
+        <tr>
+            {% for n in row %}
+            <td>{{n}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+  
+
+<div>
+    <p>Bill</p>
+    <table>
+        {% for row in bill %}
+        <tr>
+            {% for n in row %}
+            <td>{{n}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<p><a href="/ip">Go back to the product page.</a></p>
+
+</body>
+
+
+</html>

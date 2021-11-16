@@ -1,0 +1,53 @@
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>Buy Products</h1>
+  <div>
+      <p>The product you want to buy is a {{type}} product: </p>
+      <table>
+        <tr>
+            {% for n in title %}
+            <th>{{n}}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+        <tr>
+            {% for n in row %}
+            <td>{{n}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+
+  <!-- <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div> -->
+
+<form method="POST" action="/buy_check">
+<p>The amount you want to buy: </p>
+    <input type="text" name="amount">
+<p>The payment method you want to use: </p>
+    <input type="text" name="payment"> 
+<p>
+    <input type="submit" name="submit" value="Buy"> 
+    <input type="hidden" name="ip_id", value={{ip_id}}>
+    <input type="hidden" name="acc_id", value={{acc_id}}>
+</p>
+<p>{{info}}</p>
+<p><a href="../../ip">Cancel, Go back to product page.</a></p>
+</form>
+
+</body>
+
+
+</html>
