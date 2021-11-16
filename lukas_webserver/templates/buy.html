@@ -1,0 +1,70 @@
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+  </style>
+
+
+<body>
+  <h1>Buy Products</h1>
+  <div>
+      <p>The product you want to buy is a {{type}} product: </p>
+      <table>
+        <tr>
+            {% for n in title %}
+            <th>{{n}}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+        <tr>
+            {% for n in row %}
+            <td>{{n}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+    <br/>
+    <div>
+      <p>Your current balance: </p>
+      <table>
+        <tr>
+            <th>Cash balance</th>
+            <th>Investment balance</th>
+            <th>Total value</th>
+        </tr>
+        <tr>
+            {% for n in val %}
+            <td>{{n}}</td>
+            {% endfor %}
+        </tr>
+      </table>
+      <p>Note: We will use your cash balance to cover your new investment first. If the cash balance is not enough to handle, you need to enter a payment method to put more money in your account and cover the remaining investment.</p>
+    </div>
+
+
+    <br/>
+
+<form method="POST" action="/buy_check">
+<p>The amount you want to buy: </p>
+    <input type="text" name="amount">
+<p>The payment method you want to use: </p>
+    <input type="text" name="payment"> 
+<p>
+    <input type="submit" name="submit" value="Buy"> 
+    <input type="hidden" name="ip_id", value={{ip_id}}>
+    <input type="hidden" name="acc_id", value={{acc_id}}>
+</p>
+<p style="color:rgb(194, 40, 40);">{{info}}</p>
+<p><a href="../../ip/{{acc_id}}">Cancel, Go back to product page.</a></p>
+</form>
+
+</body>
+
+
+</html>
