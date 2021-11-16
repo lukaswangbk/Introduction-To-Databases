@@ -28,24 +28,18 @@ Following requirements proposed on [websit](http://www.cs.columbia.edu/~gravano/
     - User Information and Login:
         - After user login, the page shows user information and accepts update (with red warning indicating acceptable input value)
         - The page shows all the account belongs to the user and accepts create new account (with red warning indicating acceptable input value)
-        - 
-    - Talent:
-        - View Talent that STARS_IN Movies
-    - Theaters:
-        - Theaters ISA Reviewable, you can view reviews of theaters
-        - Theaters SHOW Movies at TimeSlots
-        - Users can browse the selection of Showings of Movies for each Theater
-    - Collections:
-        - Users can view their Collections on the My Collections page
-        - Collections CONTAIN Movies
-        - Allow users to create Collections on the Collections page
-        - Users can add to existing Collections on the Movies page
-    - Book:
-        - Users can view their Bookings
-        - Users BOOK (SHOWINGS of Movies in Theaters during TimeSlots)
-4. Features Not Implemented:
-    - NA
-5. Two web pages that require the most interesting database queries:
+        - User can login any one of his/her account (with red warning indicating acceptable input value)
+    - Account Information:
+        - After user login, the page shows account information and accepts update of account name
+        - User could go back to account login through back button
+        - This page shows all the investment product owned by user account and belonging to his/her watching list with different `Status` and `Actoon`
+                - For owned product, user could sell the product
+                - For watching product, user could buy it or remove it from the watching list
+        - User could check all avaiable investment product through `Check All Investment Product` button
+        - This page shows all the payment information in this account and accepts adding new payment method (with red warning indicating acceptable input value)
+
+
+4. Two web pages that require the most interesting database queries:
     - `/main` page shows Movies in the database, allows User to browse movies and information such as year, genre, runtime and overview. It shows the Talent that stars in a given movie and Reviews for each movie. On this page, we allow users to write reviews by inputing a rating and review text, which INSERTs a review tuple (or UPDATE it if a review for a movie by the current user already exists). In addition, if a user's review already exists for the movie, the form actually shows the previous review. This page is interesting because it shows a lot of information on movies, stars in each movie, and offers functionality for both browsing other users' reviews and writing reviews. Users are also able to search for movies by name, year or genre.
     - `/theaters` page shows Theaters in the database, displays information such as address, contact info and seat capacity. It shows the Showings at each Theater and allows Users to Book tickets using a form that INSERTs a Book tuple (if it exists, UPDATE the booking). In addition, the page shows the User's existing ticket Bookings. We also display the Reviews for each Theater and allow the User to write a review for each Theater (which inserts a rating and review text, or updates the existing review if it already exists). This page is interesting becuase it offers information on theaters, movie showings at each theater, reviews for theaters, the user's movie showing bookings, and offers functionality for booking showings and writing reviews on the same page.
 
