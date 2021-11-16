@@ -32,7 +32,7 @@ Following requirements proposed on [websit](http://www.cs.columbia.edu/~gravano/
     - Account Information:
         - After user login, the page shows account information and accepts update of account name
         - User could go back to account login through back button
-        - This page shows all the investment product owned by user account and belonging to his/her watching list with different `Status` and `Actoon`
+        - This page shows all the investment product owned by user account and belonging to his/her watching list with different `Status` and `Action`
           - For owned product, user could sell the product
           - For watching product, user could buy it or remove it from the watching list
         - User could check all avaiable investment product through `Check All Investment Product` button
