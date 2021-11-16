@@ -129,7 +129,7 @@ def user(user):
     acc_name.append(result['acc_name'])
     since.append(result['since'])
   cursor.close()
-  user_id = user_id.split()
+  user_id = user_id
   context = dict(user_id=user_id, user_name=user_name, mobile=mobile, email=email, address=address, passport_no=passport_no, acc_id=acc_id, acc_name=acc_name, since=since)
   return render_template("user.html", **context)
 
@@ -1152,6 +1152,12 @@ def sell(acc_id, ip_id):
   val = [vals[0][0], vals[0][1], vals[0][2]]
   c4.close()
 
+  c5 = g.conn.execute('''
+        SELECT amount FROM owns WHERE acc_id=%s and ip_id=%s
+    ''', acc_id, ip_id)
+  val.append(c5.fetchone()[0])
+  c5.close()
+
   context = dict(info = info, type=type, data=data, title=title, acc_id=acc_id, ip_id = ip_id, val=val)
   return render_template("sell.html", **context)
 
@@ -1230,7 +1236,13 @@ def sell_check():
         val = [vals[0][0], vals[0][1], vals[0][2]]
         c4.close()
 
-        context = dict(info = info, type=type, data=data, title=title, acc_id=acc_id, ip_id = ip_id, val=val)
+        c5 = g.conn.execute('''
+            SELECT amount FROM owns WHERE acc_id=%s and ip_id=%s
+            ''', acc_id, ip_id)
+        val.append(c5.fetchone()[0])
+        c5.close()
+
+        context = dict(info=info, type=type, data=data, title=title, acc_id=acc_id, ip_id=ip_id, val=val)
         return render_template("sell.html", **context)
 
       else:
