@@ -13,6 +13,8 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, url_for
+import datetime
+import random
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -488,8 +490,366 @@ def addpaymentmethod():
 @app.route('/checkallinvestmentproduct', methods=['POST'])
 def checkallinvestmentproduct():
   acc_id = request.form['acc_id']
-  context = dict(acc_id=acc_id)
+  return redirect(url_for('ip', acc_id=acc_id))
+
+
+@app.route('/ip/<acc_id>', methods=['POST', 'GET'])
+def ip(acc_id):
+  query = '''SELECT * FROM investment_product'''
+  cursor = g.conn.execute(query)
+  table = []
+  for result in cursor:
+    row = list(result)
+
+    id = result[0]
+    c_stock = g.conn.execute("SELECT * FROM stock where ip_id = %s", id)
+    if len(list(c_stock)): row.append("stock")
+    c_stock.close()
+    c_bond = g.conn.execute("SELECT * FROM bond where ip_id = %s", id)
+    if len(list(c_bond)): row.append("bond")
+    c_bond.close()
+    c_gold = g.conn.execute("SELECT * FROM gold where ip_id = %s", id)
+    if len(list(c_gold)): row.append("gold")
+    c_gold.close()
+
+    table.append(row)  # can also be accessed using result[0]
+  cursor.close()
+  title = ['ID', 'Name', 'Risk Type', 'Current Yield', 'Minimum Investment value', 'Create Date', 'Expire Date', 'Freezing Time', 'Note', 'Status', 'Current Value', 'Expected Value', 'Description', 'Category']
+  context = dict(data=table, title=title, acc_id=acc_id)
   return render_template("ip.html", **context)
+
+
+@app.route('/ip_query', methods=['POST', 'GET'])
+def ip_query():
+  title = ['ID', 'Name', 'Risk Type', 'Current Yield', 'Minimum Investment value', 'Create Date', 'Expire Date',
+           'Freezing Time', 'Note', 'Status', 'Current Value', 'Expected Value', 'Description', 'Category']
+  acc = request.form['acc_save']
+  acc_id = acc[2:-2]
+  id = request.form['id']
+  name = request.form['name']
+  risk = request.form['risk']
+  status = request.form['status']
+  category = request.form['category']
+  curr_yield = request.form['curr_yield']
+  min_inv_value = request.form['min_inv_value']
+  freeze_time = request.form['freeze_time']
+  create_date = request.form['create_date']
+  expire_date = request.form['expire_date']
+
+  if len(id)==0: id = '%'
+  else: id = '%'+id+'%'
+  if len(name)==0: name='%'
+  else: name = '%'+name+'%'
+  if risk=='all': risk='%'
+  if status=='all': status='%'
+
+  if category=='all':
+    query = '''
+              SELECT * FROM investment_product ip
+              WHERE ip.ip_id LIKE %s and ip.ip_name LIKE %s and ip.risk_type LIKE %s and ip.status LIKE %s
+              '''
+  elif category=='stock':
+    query = '''
+            SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, s.capital_price, s.open_price, s.close_price
+            FROM investment_product ip, stock s
+            WHERE ip.ip_id = s.ip_id and ip.ip_id LIKE %s and ip.ip_name LIKE %s and ip.risk_type LIKE %s and ip.status LIKE %s
+            '''
+    title = title[:-1] + ["Stock Capital Price", "Stock Open Price", "Stock Close Price"]
+
+  elif category == 'bond':
+    query = '''
+            SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, b.maturity, b.face_value, b.issue_price
+            FROM investment_product ip, bond b
+            WHERE ip.ip_id = b.ip_id and ip.ip_id LIKE %s and ip.ip_name LIKE %s and ip.risk_type LIKE %s and ip.status LIKE %s
+            '''
+    title = title[:-1] + ["Bond Maturity", "Bond Face Value", "Bond Issue Price"]
+
+  elif category == 'gold':
+    query = '''
+            SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, g.gold_price
+            FROM investment_product ip, gold g
+            WHERE ip.ip_id = g.ip_id and ip.ip_id LIKE %s and ip.ip_name LIKE %s and ip.risk_type LIKE %s and ip.status LIKE %s
+            '''
+    title = title[:-1] + ["Gold Price"]
+
+
+  if curr_yield=='default' and min_inv_value=='default' and freeze_time=='default' and create_date=='default' and expire_date=='default':
+      cursor = g.conn.execute(query, id, name, risk, status)
+  else:
+    order = " ORDER BY "
+    if curr_yield == 'high': order += "ip.curr_yield DESC,"
+    elif curr_yield =='low': order += "ip.curr_yield ASC,"
+    if min_inv_value == 'high': order += "ip.min_inv_value DESC,"
+    elif min_inv_value == 'low': order += "ip.min_inv_value ASC,"
+    if freeze_time == 'long': order += "ip.freezing_time DESC,"
+    elif freeze_time == 'short': order += "ip.freezing_time ASC,"
+    if create_date == 'latest': order += "ip.create_date DESC,"
+    elif create_date == 'early': order += "ip.create_date ASC,"
+    if expire_date == 'latest': order += "ip.expire_date DESC,"
+    elif expire_date == 'early': order += "ip.expire_date ASC,"
+    cursor = g.conn.execute(query+order[:-1], id, name, risk, status)
+
+  table = []
+  for result in cursor:
+    row = list(result)
+    if category == 'all':
+      id = result[0]
+      c_stock = g.conn.execute("SELECT * FROM stock where ip_id = %s", id)
+      if len(list(c_stock)): row.append("stock")
+      c_stock.close()
+      c_bond = g.conn.execute("SELECT * FROM bond where ip_id = %s", id)
+      if len(list(c_bond)): row.append("bond")
+      c_bond.close()
+      c_gold = g.conn.execute("SELECT * FROM gold where ip_id = %s", id)
+      if len(list(c_gold)): row.append("gold")
+      c_gold.close()
+
+    table.append(row)  # can also be accessed using result[0]
+  cursor.close()
+  context = dict(data=table, title=title, acc_id=acc)
+  return render_template("ip.html", **context)
+
+@app.route('/ip_action', methods=['POST', 'GET'])
+def ip_action():
+  ip_id = list(request.form)[1]
+  acc = request.form['acc']
+  acc_id = acc[2:-2]
+  action = request.form[ip_id]
+
+  if action == 'Buy':
+    return redirect(url_for('buy', acc_id=acc, ip_id=ip_id))
+
+  elif action == 'Follow':
+    # add to watching list
+    c1 = g.conn.execute("SELECT list_id FROM create_watchinglist WHERE acc_id=%s", acc_id)
+    list_id = c1.fetchone()[0]
+    c1.close()
+
+    c2_check = g.conn.execute("SELECT * FROM contains WHERE list_id=%s and acc_id=%s and ip_id=%s", list_id, acc_id, ip_id)
+    if len(list(c2_check)) == 0:
+      today = datetime.date.today()
+      c2 = g.conn.execute("INSERT INTO contains VALUES (%s, %s, %s, %s)", list_id, acc_id, ip_id, today)
+      c2.close()
+    c2_check.close()
+
+    c3 = g.conn.execute("SELECT * FROM contains WHERE acc_id=%s", acc_id)
+    data = []
+    for row in c3:
+      data.append(list(row))
+    context = dict(data=data)
+    return render_template('exp.html', **context)
+
+
+@app.route('/buy/<acc_id>/<ip_id>', methods=['POST', 'GET'])
+def buy(acc_id, ip_id):
+
+  info = ""
+
+  c1 = g.conn.execute('''
+          SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, s.capital_price, s.open_price, s.close_price
+          FROM investment_product ip, stock s
+          WHERE ip.ip_id = s.ip_id and ip.ip_id = %s
+          ''', ip_id)
+  data = list(c1)
+  if len(data) > 0:
+    type = 'stock'
+    title = ['ID', 'Name', 'Risk Type', 'Current Yield', 'Minimum Investment value', 'Create Date', 'Expire Date',
+           'Freezing Time', 'Note', 'Status', 'Current Value', 'Expected Value', 'Description', 'Stock Capital Price', 'Stock Open Price', 'Stock Close Price']
+  else:
+    c2 = g.conn.execute('''
+                SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, b.maturity, b.face_value, b.issue_price
+                FROM investment_product ip, bond b
+                WHERE ip.ip_id = b.ip_id and ip.ip_id = %s
+                ''', ip_id)
+    data = list(c2)
+    if len(data) > 0:
+      type = 'bond'
+      title = ['ID', 'Name', 'Risk Type', 'Current Yield', 'Minimum Investment value', 'Create Date', 'Expire Date',
+               'Freezing Time', 'Note', 'Status', 'Current Value', 'Expected Value', 'Description', 'Bond Maturity',
+               'Bond Face Value', 'Bond Issue Price']
+    else:
+      c3 = g.conn.execute('''
+                    SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, g.gold_price
+                    FROM investment_product ip, gold g
+                    WHERE ip.ip_id = g.ip_id and ip.ip_id = %s
+                    ''', ip_id)
+      data = list(c3)
+      if len(data) > 0:
+        type = 'gold'
+        title = ['ID', 'Name', 'Risk Type', 'Current Yield', 'Minimum Investment value', 'Create Date', 'Expire Date',
+                 'Freezing Time', 'Note', 'Status', 'Current Value', 'Expected Value', 'Description', 'Gold Price']
+      c3.close()
+    c2.close()
+  c1.close()
+
+  context = dict(info = info, type=type, data=data, title=title, acc_id=acc_id, ip_id = ip_id)
+  return render_template("buy.html", **context)
+
+def generate_id(n):
+  id = ""
+  for i in range(n):
+    ch = chr(random.randrange(ord('0'), ord('9') + 1))
+    id += ch
+  return id
+
+def is_number(s):
+  try:
+    float(s)
+    return True
+  except ValueError:
+    return False
+
+
+@app.route('/buy_check', methods=['POST', 'GET'])
+def buy_check():
+  if request.method == 'POST':
+      acc_id = request.form['acc_id']
+      ip_id = request.form['ip_id']
+      amount = request.form['amount']
+      payment = request.form['payment']
+      acc_id = acc_id[2:-2]
+      transaction = True
+
+      # check amount > min_inv_value
+      c1 = g.conn.execute("SELECT min_inv_value FROM investment_product WHERE ip_id=%s", ip_id)
+      min_inv_value = c1.fetchone()[0]
+      if is_number(amount) == False:
+        transaction = False
+        info = "Please input a valid amount."
+      elif float(min_inv_value) > float(amount):
+          transaction = False
+          info = "The invesment amount needs to be larger than minimum investment value."
+      c1.close()
+      # check payment method correct
+      c2 = g.conn.execute("SELECT pay_id FROM has_payment_method WHERE pay_id=%s and acc_id = %s", payment, acc_id)
+      data = list(c2)
+      if len(data) == 0:
+        transaction = False
+        info = "You don't have this payment method."
+      c2.close()
+
+      if transaction == False:
+        c1 = g.conn.execute('''
+                SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, s.capital_price, s.open_price, s.close_price
+                FROM investment_product ip, stock s
+                WHERE ip.ip_id = s.ip_id and ip.ip_id = %s
+                ''', ip_id)
+        data = list(c1)
+        if len(data) > 0:
+          type = 'stock'
+          title = ['ID', 'Name', 'Risk Type', 'Current Yield', 'Minimum Investment value', 'Create Date', 'Expire Date',
+                   'Freezing Time', 'Note', 'Status', 'Current Value', 'Expected Value', 'Description',
+                   'Stock Capital Price', 'Stock Open Price', 'Stock Close Price']
+        else:
+          c2 = g.conn.execute('''
+                      SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, b.maturity, b.face_value, b.issue_price
+                      FROM investment_product ip, bond b
+                      WHERE ip.ip_id = b.ip_id and ip.ip_id = %s
+                      ''', ip_id)
+          data = list(c2)
+          if len(data) > 0:
+            type = 'bond'
+            title = ['ID', 'Name', 'Risk Type', 'Current Yield', 'Minimum Investment value', 'Create Date',
+                     'Expire Date',
+                     'Freezing Time', 'Note', 'Status', 'Current Value', 'Expected Value', 'Description',
+                     'Bond Maturity',
+                     'Bond Face Value', 'Bond Issue Price']
+          else:
+            c3 = g.conn.execute('''
+                          SELECT ip.ip_id, ip.ip_name, ip.risk_type, ip.curr_yield, ip.min_inv_value, ip.create_date, ip.expire_date, ip.freezing_time, ip.note, ip.status, ip.curr_value, ip.exp_value, ip.description, g.gold_price
+                          FROM investment_product ip, gold g
+                          WHERE ip.ip_id = g.ip_id and ip.ip_id = %s
+                          ''', ip_id)
+            data = list(c3)
+            if len(data) > 0:
+              type = 'gold'
+              title = ['ID', 'Name', 'Risk Type', 'Current Yield', 'Minimum Investment value', 'Create Date',
+                       'Expire Date',
+                       'Freezing Time', 'Note', 'Status', 'Current Value', 'Expected Value', 'Description',
+                       'Gold Price']
+            c3.close()
+          c2.close()
+        c1.close()
+
+        context = dict(info=info, type=type, data=data, title=title, acc_id=acc_id, ip_id=ip_id)
+        return render_template("buy.html", **context)
+
+      else:
+        # make transaction
+          # add to owns
+          c_own_check = g.conn.execute("SELECT * FROM owns WHERE acc_id=%s and ip_id=%s", acc_id, ip_id)
+          data = list(c_own_check)
+          if len(data) == 0:
+            c_own = g.conn.execute('''
+                  INSERT INTO owns VALUES(%s, %s, %s)
+                  ''', acc_id, ip_id, amount)
+            c_own.close()
+          else:
+            original_amount = data[0][2]
+            new_amount = float(original_amount)+float(amount)
+            c_own = g.conn.execute('''
+                  UPDATE owns SET amount=%s WHERE acc_id=%s and ip_id=%s
+                  ''', new_amount, acc_id, ip_id)
+            c_own.close()
+
+          # update account value
+          c_acc = g.conn.execute("SELECT inv_balance, total_value FROM account WHERE acc_id=%s", acc_id)
+          data = list(c_acc)
+          inv_bal_ori, tot_bal_ori = data[0][0], data[0][1]
+          inv_bal_new = float(inv_bal_ori)+float(amount)
+          tot_bal_new = float(tot_bal_ori)+float(amount)
+          c_acc_update = g.conn.execute("UPDATE account SET inv_balance=%s, total_value=%s WHERE acc_id=%s", inv_bal_new, tot_bal_new, acc_id)
+          c_acc_update.close()
+          c_acc.close()
+
+          # add to bill
+          bill_id = generate_id(5)
+          c_check = g.conn.execute("SELECT * FROM bill WHERE bill_id = %s", bill_id)
+          data = list(c_check)
+          while len(data)!=0:
+            bill_id = generate_id(6)
+            c_check = g.conn.execute("SELECT * FROM bill WHERE bill_id = %s", bill_id)
+            data = list(c_check)
+          c_check.close()
+
+          today = datetime.date.today()
+          c_bill = g.conn.execute('''
+                INSERT INTO bill VALUES(%s, %s, %s, %s, %s)
+                ''', bill_id, today, 'buy', amount, '')
+          c_bill.close()
+
+          # add to trade
+          c_trade = g.conn.execute('''
+                INSERT INTO trade VALUES(%s, %s, %s)
+                ''', acc_id, ip_id, bill_id)
+          c_trade.close()
+
+          info = "Successful to buy the product!"
+
+          c = g.conn.execute("SELECT * FROM account WHERE acc_id=%s", acc_id)
+          acc = []
+          for result in c:
+            acc.append(list(result))
+          c.close()
+
+          c1 = g.conn.execute("SELECT * FROM owns WHERE acc_id=%s", acc_id)
+          own = []
+          for result in c1:
+            own.append(list(result))
+          c1.close()
+
+          c2 = g.conn.execute("SELECT t.acc_id, t.ip_id, t.bill_id, b.date, b.type, b.amount, b.note FROM bill b, trade t WHERE b.bill_id=t.bill_id and t.acc_id=%s", acc_id)
+          bill = []
+          for result in c2:
+            bill.append(list(result))
+          c2.close()
+
+          context = dict(data=info, acc=acc, own=own, bill=bill)
+          c2.close()
+          return render_template("buy_success.html", **context)
+
+  else:
+    return redirect('ip.html')
 
 if __name__ == "__main__":
   import click

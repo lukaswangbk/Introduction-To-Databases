@@ -1,0 +1,122 @@
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+  </style>
+
+
+<body>
+  <h1>Investment Products</h1>
+
+  <form method="POST" action="/ip_query">
+    <p>
+        ID: <input type="text" name="id"> 
+        Name: <input type="text" name="name">
+    </p>
+    <p>
+        Risk: <select name="risk">
+                <option value="all">all</option>
+                <option value="high">high</option>
+                <option value="medium">medium</option>
+                <option value="low">low</option>
+            </select>
+        Status: <select name="status">
+                <option value="all">all</option>
+                <option value="open">open</option>
+                <option value="close">close</option>
+            </select>
+        Category:<select name="category">
+                <option value="all">all</option>
+                <option value="stock">stock</option>
+                <option value="bond">bond</option>
+                <option value="gold">gold</option>
+            </select>
+    </p>
+    <p>
+        Current Yield: <select name="curr_yield">
+            <option value="default">default</option>
+            <option value="high">from high to low</option>
+            <option value="low">from low to high</option>
+            </select>
+        Minimum Invesment value:
+        <select name="min_inv_value">
+            <option value="default">default</option>
+            <option value="high">from high to low</option>
+            <option value="low">from low to high</option>
+        </select>
+        Freezing Time:
+        <select name="freeze_time">
+            <option value="default">default</option>
+            <option value="short">from short to long</option>
+            <option value="long">from long to short</option>
+        </select>
+        Create Date:
+        <select name="create_date">
+            <option value="default">default</option>
+            <option value="early">earlist first</option>
+            <option value="latest">latest first</option>
+        </select>
+        Expire Date:
+        <select name="expire_date">
+            <option value="default">default</option>
+            <option value="early">earlist first</option>
+            <option value="latest">latest first</option>
+        </select>
+
+    </p>
+    <p>
+        <input type="submit" value="Apply">
+    </p>
+    <p><input type="hidden" name="acc_save" value={{acc_id}}></p>
+    </form>
+  
+  <div>
+    <table>
+        <tr>
+            {% for n in title %}
+            <th>{{n}}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+        <tr>
+            {% for n in row %}
+            <td>{{n}}</td>
+            {% endfor %}
+            <form method="POST" action="/ip_action">
+                <p><input type="hidden" name="acc" value={{acc_id}}></p>
+                <td><input type="submit" name={{row[0]}} value="Buy">
+                    <input type="submit" name={{row[0]}} value="Follow">
+                </td>
+            </form>
+        </tr>
+        {% endfor %}
+    </table>
+  </div>
+
+  <!-- <div>
+    {% for n in data['ip_id'] %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div>
+
+  <div>
+    {% for n in data['ip_name'] %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div> -->
+
+<!-- <p><a href="another">Go to the other page</a></p>
+
+<form method="POST" action="/add">
+<p>Name of new computer scientist: <input type="text" name="name"> <input type="submit" value="Add"></p>
+</form> -->
+
+</body>
+
+
+</html>
