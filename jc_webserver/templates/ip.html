@@ -4,6 +4,9 @@
       font-size: 15pt;
       font-family: arial;
     }
+    table, th, td {
+      border: 1px solid black;
+    }
   </style>
 
 
@@ -69,6 +72,7 @@
     <p>
         <input type="submit" value="Apply">
     </p>
+    <p><input type="hidden" name="acc_save" value={{acc_id}}></p>
     </form>
   
   <div>
@@ -84,6 +88,7 @@
             <td>{{n}}</td>
             {% endfor %}
             <form method="POST" action="/ip_action">
+                <p><input type="hidden" name="acc" value={{acc_id}}></p>
                 <td><input type="submit" name={{row[0]}} value="Buy">
                     <input type="submit" name={{row[0]}} value="Follow">
                 </td>
@@ -92,6 +97,12 @@
         {% endfor %}
     </table>
   </div>
+
+
+  <form method="POST" action="/back_action">
+    <p><input type="hidden" name="acc" value={{acc_id}}></p>
+    <td><input type="submit" value="Back"></td>
+  </form>
 
 </body>
 

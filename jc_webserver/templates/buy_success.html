@@ -4,11 +4,14 @@
       font-size: 15pt;
       font-family: arial;
     }
+    table, th, td {
+      border: 1px solid black;
+    }
   </style>
 
 
 <body>
-  <h1>{{data}}</h1>
+  <div>{{data}}</div>
 
 <div>
     <h3>Account Information</h3>
@@ -71,7 +74,7 @@
     </table>
 </div>
 
-<p><a href="/ip">Go back to the product page.</a></p>
+<p><a href="/ip/{{acc[0][0]}}">Go back to the product page.</a></p>
 
 </body>
 

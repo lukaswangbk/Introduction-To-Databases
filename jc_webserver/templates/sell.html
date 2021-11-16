@@ -34,6 +34,7 @@
               <th>Cash balance</th>
               <th>Investment balance</th>
               <th>Total value</th>
+              <th>Own this investment product</th>
           </tr>
           <tr>
               {% for n in val %}
@@ -55,7 +56,7 @@
     <input type="hidden" name="acc_id", value={{acc_id}}>
 </p>
 <p style="color:rgb(194, 40, 40);">{{info}}</p>
-<p><a href="../../ip">Cancel, Go back to product page.</a></p>
+<p><a href="../../ip/{{acc_id}}">Cancel, Go back to product page.</a></p>
 </form>
 
 </body>

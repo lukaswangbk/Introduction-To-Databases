@@ -1,0 +1,150 @@
+<html>
+  <style>
+    body{ 
+      font-size: 15pt;
+      font-family: arial;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+  </style>
+
+<body>
+
+  <h1>Account Information</h1>
+  <table>
+    <thead>
+      <tr>
+        <th> Account ID </th>
+        <th> Account Name </th>
+        <th> Cash Balance </th>
+        <th> Investment Balance </th>
+        <th> Total Value </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in range(acc|length)%}
+      <tr>
+        <td> {{acc[i]}} </td>
+        <td> {{acc_name[i]}} </td>
+        <td> {{cash_balance[i]}} </td>
+        <td> {{inv_balance[i]}} </td>
+        <td> {{total_value[i]}} </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Update Account Information</h2>
+  <form method="POST" action="/updateaccountinfo">
+    <p>New Account Name: <input type="text" name="new_name"></p>
+    <p> <input type="submit" value="Update"> </p>
+    <p> <input type="hidden" name="acc" value={{acc}}> </p>
+  </form>
+
+  <h1>Investment Product</h1>
+  <table>
+    <thead>
+      <tr>
+        <th> Investment Product IP </th>
+        <th> Investment Product Name </th>
+        <th> Amount Owned </th>
+        <th> Risk Type </th>
+        <th> Current Yield </th>
+        <th> Watching List ID </th>
+        <th> Watching List Add Time </th>
+        <th> Status </th>
+        <th> Action </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in range(O_IP_id|length)%}
+      <tr>
+        <td> {{O_IP_id[i]}} </td>
+        <td> {{O_ip_name[i]}} </td>
+        <td> {{O_amount[i]}} </td>
+        <td> {{O_risk_type[i]}} </td>
+        <td> {{O_curr_yield[i]}} </td>
+        <td></td>
+        <td> {{O_curr_yield[i]}} </td>
+        <td> Owned </td>
+        <td> 
+          <form method="POST" action="/ip_action">
+            <input type="hidden" name="acc" value={{acc}}>
+            <input type="submit" name={{O_IP_id[i]}} value="Sell"> 
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      {% for i in range(C_IP_id|length)%}
+      <tr>
+        <td> {{C_IP_id[i]}} </td>
+        <td> {{C_ip_name[i]}} </td>
+        <td></td>
+        <td> {{C_risk_type[i]}} </td>
+        <td> {{C_curr_yield[i]}} </td>
+        <td> {{C_list_id[i]}} </td>
+        <td> {{C_add_time[i]}} </td>
+        <td> Watching </td>
+        <td> 
+          <form method="POST" action="/ip_action">
+            <input type="hidden" name="acc" value={{acc}}>
+            <input type="submit" name={{C_IP_id[i]}} value="Buy"> 
+          </form>
+          <form method="POST" action="/removewatching">
+            <input type="hidden" name="acc" value={{acc}}>
+            <input type="submit" name={{C_IP_id[i]}} value="Remove">
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form method="POST" action="/checkallinvestmentproduct">
+    <p> <input type="submit" value="Check All Investment Product"> </p>
+    <p> <input type="hidden" name="acc_id" value={{acc}}> </p>
+  </form>
+
+  <h1>Payment Information</h1>
+  <table>
+    <thead>
+      <tr>
+        <th> Payment ID</th>
+        <th> Type </th>
+        <th> Card Number </th>
+        <th> Card Name </th>
+        <th> Card Expire </th>
+        <th> Create Date </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in range(pay_id|length)%}
+      <tr>
+        <td> {{pay_id[i]}} </td>
+        <td> {{type[i]}} </td>
+        <td> {{card_no[i]}} </td>
+        <td> {{card_name[i]}} </td>
+        <td> {{card_expire[i]}} </td>
+        <td> {{create_date[i]}} </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Add Payment Method</h2>
+  <form method="POST" action="/addpaymentmethod">
+    <p>Payment ID: <input type="text" name="pay_id"></p>
+    <p>Type: <input type="text" name="type"></p>
+    <p>Card Number: <input type="text" name="card_no"></p>
+    <p>Card Name: <input type="text" name="card_name"></p>
+    <p>Card Expire: <input type="text" name="card_expire"></p>
+    <p> <input type="submit" value="Add"> </p>
+    <p> <input type="hidden" name="acc_id" value={{acc}}> </p>
+  </form>
+
+
+</body>
+
+
+</html>
