@@ -46,7 +46,7 @@ engine.execute("""CREATE TABLE IF NOT EXISTS test (
   name text
 );""")
 engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-engine.execute("""DELETE FROM Has_Payment_method WHERE pay_id='05' or pay_id='06' or pay_id='07' AND acc_id='00001';""")
+engine.execute("""DELETE FROM Has_Payment_method WHERE pay_id='';""")
 
 
 @app.before_request

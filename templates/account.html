@@ -68,7 +68,12 @@
         <td></td>
         <td> {{O_curr_yield[i]}} </td>
         <td> Owned </td>
-        <td> <input type="submit" name={{O_IP_id[i]}} value="Sell"> </td>
+        <td> 
+          <form method="POST" action="/ip_action">
+            <input type="hidden" name="acc" value={{acc}}>
+            <input type="submit" name={{O_IP_id[i]}} value="Sell"> 
+          </form>
+        </td>
       </tr>
       {% endfor %}
       {% for i in range(C_IP_id|length)%}
