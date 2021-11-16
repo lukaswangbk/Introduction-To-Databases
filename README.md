@@ -33,8 +33,8 @@ Following requirements proposed on [websit](http://www.cs.columbia.edu/~gravano/
         - After user login, the page shows account information and accepts update of account name
         - User could go back to account login through back button
         - This page shows all the investment product owned by user account and belonging to his/her watching list with different `Status` and `Actoon`
-                - For owned product, user could sell the product
-                - For watching product, user could buy it or remove it from the watching list
+          - For owned product, user could sell the product
+          - For watching product, user could buy it or remove it from the watching list
         - User could check all avaiable investment product through `Check All Investment Product` button
         - This page shows all the payment information in this account and accepts adding new payment method (with red warning indicating acceptable input value)
 
