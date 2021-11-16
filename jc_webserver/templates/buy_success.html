@@ -8,11 +8,18 @@
 
 
 <body>
-  <div>{{data}}</div>
+  <h1>{{data}}</h1>
 
 <div>
-    <p>Account</p>
+    <h3>Account Information</h3>
     <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Cash Balance</th>
+            <th>Investment Balance</th>
+            <th>Total Value</th>
+        </tr>
         {% for row in acc %}
         <tr>
             {% for n in row %}
@@ -24,8 +31,13 @@
 </div>
 
 <div>
-    <p>Owns</p>
+    <h3>Investment Product Owned</h3>
     <table>
+        <tr>
+            <th>Account ID</th>
+            <th>Investment Product ID</th>
+            <th>Amount invested</th>
+        </tr>
         {% for row in own %}
         <tr>
             {% for n in row %}
@@ -35,11 +47,20 @@
         {% endfor %}
     </table>
 </div>
-  
+
 
 <div>
-    <p>Bill</p>
+    <h3>Trading Information</h3>
     <table>
+        <tr>
+            <th>Account ID</th>
+            <th>Investment Product ID</th>
+            <th>Bill ID</th>
+            <th>Trading Date</th>
+            <th>Trading Type</th>
+            <th>Trading Amount</th>
+            <th>Note</th>
+        </tr>
         {% for row in bill %}
         <tr>
             {% for n in row %}
