@@ -956,24 +956,28 @@ def buy_check():
       # check amount > min_inv_value
       c1 = g.conn.execute("SELECT min_inv_value FROM investment_product WHERE ip_id=%s", ip_id)
       min_inv_value = c1.fetchone()[0]
-      if is_number(amount) == False:
+      if len(amount) == 0:
+        transaction = False
+        info = "Amount cannot be empty."
+      elif is_number(amount) == False:
         transaction = False
         info = "Please input a valid amount."
       elif float(min_inv_value) > float(amount):
           transaction = False
           info = "The invesment amount needs to be larger than minimum investment value."
-      c1.close()
 
-      # check payment method correct
-      c_acc = g.conn.execute("SELECT cash_balance FROM account WHERE acc_id=%s", acc_id)
-      cash_bal = c_acc.fetchone()[0]
-      if float(cash_bal) < float(amount):
-        c2 = g.conn.execute("SELECT pay_id FROM has_payment_method WHERE pay_id=%s and acc_id = %s", payment, acc_id)
-        data = list(c2)
-        if len(data) == 0:
-          transaction = False
-          info = "You need to have a payment method to cover the amount but you enter an invalid one."
-        c2.close()
+      else:
+        # check payment method correct
+        c_acc = g.conn.execute("SELECT cash_balance FROM account WHERE acc_id=%s", acc_id)
+        cash_bal = c_acc.fetchone()[0]
+        if float(cash_bal) < float(amount):
+          c2 = g.conn.execute("SELECT pay_id FROM has_payment_method WHERE pay_id=%s and acc_id = %s", payment, acc_id)
+          data = list(c2)
+          if len(data) == 0:
+            transaction = False
+            info = "You need to have a payment method to cover the amount but you enter an invalid one."
+          c2.close()
+      c1.close()
 
       if transaction == False:
         c1 = g.conn.execute('''
@@ -1187,7 +1191,10 @@ def sell_check():
       # check own_amount > amount
       c1 = g.conn.execute("SELECT amount FROM owns WHERE acc_id=%s and ip_id=%s", acc_id, ip_id)
       amount_owned = c1.fetchone()[0]
-      if is_number(amount) == False:
+      if len(amount) == 0:
+        transaction = False
+        info = "Amount cannot be empty."
+      elif is_number(amount) == False:
         transaction = False
         info = "Please input a valid amount."
       elif float(amount) <= 0:
