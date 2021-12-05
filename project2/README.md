@@ -221,45 +221,34 @@ CREATE TRIGGER check_length BEFORE INSERT OR UPDATE ON composed
 
 ### Query 1
 
-We want to find out who follows users whose first name is Hiroshi and las name is Oshio. This is one of the interesting query we made in project 1 part 2. And we made changes to this query to accommodate all changes have beed made to the USERS table. This query shows how we handle the composite type.
+We want to test the trigger function in this query. In the first case, we tried to insert a composed product with portion array length != contained_ip array length. In the second case, we tried to insert a composed product with the sum of all portions not equal to 1. Both insertion attempts fail under the trigger checking.
 
 ```SQL
-SELECT u1.u_id, (u1.user_info).name[1], (u1.user_info).name[2] FROM USERS u1
-WHERE u1.u_id in (
-	SELECT f.follower_id FROM USERS u2
-	INNER JOIN FOLLOW f ON
-	u2.u_id = f.followed_id
-	WHERE (u2.user_info).name[1] = 'Hiroshi' AND (u2.user_info).name[2] = 'Oshio'
-	);
+INSERT INTO composed VALUES ('116088', 'Composed Index Fund A', 'high', 0.4016, 10, '2021-11-13', NULL, 0, 'composed product', 'open', 120, NULL, '1.12% handling fee', ARRAY ['005063','005064','012461','012462'], ARRAY[0.4, 0.4, 0.2]);
 ```
 
-![](https://raw.githubusercontent.com/Morris135212/COMS4111-project2/main/images/query1.png)
+```SQL
+INSERT INTO composed VALUES ('116088', 'Composed Index Fund A', 'high', 0.4016, 10, '2021-11-13', NULL, 0, 'composed product', 'open', 120, NULL, '1.12% handling fee', ARRAY ['005063','005064','012461','012462'], ARRAY[0.4, 0.4, 0.1, 0.05]);
+```
+![](image/q1.jpg)
 
 ### Query 2
 
-This query shows how the trigger functions work. Suppose we insert a new record into the DATASETS. The Trigger function will be executed automatically after the inseration have done. The detail is that we will add (The operation, timestamp, dataset id) into the datasets_audit Table.
-
+The second query is to find all the composed products which include ip_id='005063' product as one of the components.
 ```SQL
-INSERT INTO DATASETS (name, idx, provenance) VALUES ('ImageNet', '12345675', 'https://image-net.org/');
-
-SELECT * FROM datasets_audit;
+SELECT c.ip_id, c.ip_name, c.contained_ip, c.portion
+FROM composed c
+WHERE '005063' = ANY(c.contained_ip);
 ```
-
-![](https://raw.githubusercontent.com/Morris135212/COMS4111-project2/main/images/query2.png)
+![](image/q2.jpg)
 
 ### Query 3
 
-The third query is to find out which datasets have been explored in the course related to machine learning.
+The third query is to find out which composed product includes the keyword "mutual fund" in its note.
 
 ```SQL
-SELECT d.name FROM datasets d
-INNER JOIN EXPLORE e 
-ON d.idx = e.d_id
-INNER JOIN COURSES c
-ON c.idx = e.c_id
-WHERE to_tsvector(c.description) @@ to_tsquery('machine & learning');
+SELECT c.ip_id, c.ip_name, c.note
+FROM composed c
+WHERE to_tsvector(c.note) @@ to_tsquery('mutual & fund');
 ```
-
-![](https://raw.githubusercontent.com/Morris135212/COMS4111-project2/main/images/query3.png)
-
-
+![](image/q3.jpg)
