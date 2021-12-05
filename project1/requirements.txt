@@ -1,0 +1,4 @@
+# requirements.txt
+flask
+psycopg2
+sqlalchemy
